@@ -75,6 +75,13 @@ func (gui *Gui) GetInitialKeybindings() []*Binding {
 			Handler:  gui.quit,
 		},
 		{
+			ViewName:    "",
+			Key:         'M', // Shift+M
+			Modifier:    gocui.ModNone,
+			Handler:     wrappedHandler(gui.handleToggleMouse),
+			Description: "Toggle mouse mode (ON/OFF)",
+		},
+		{
 			ViewName: "",
 			Key:      gocui.KeyPgup,
 			Modifier: gocui.ModNone,
@@ -236,6 +243,13 @@ func (gui *Gui) GetInitialKeybindings() []*Binding {
 		},
 		{
 			ViewName:    "containers",
+			Key:         'l',
+			Modifier:    gocui.ModNone,
+			Handler:     gui.handleContainerViewLogsExternal,
+			Description: "View logs with external pager",
+		},
+		{
+			ViewName:    "containers",
 			Key:         'E',
 			Modifier:    gocui.ModNone,
 			Handler:     gui.handleContainersExecShell,
@@ -317,6 +331,13 @@ func (gui *Gui) GetInitialKeybindings() []*Binding {
 			Modifier:    gocui.ModNone,
 			Handler:     gui.handleServiceRenderLogsToMain,
 			Description: gui.Tr.ViewLogs,
+		},
+		{
+			ViewName:    "services",
+			Key:         'l',
+			Modifier:    gocui.ModNone,
+			Handler:     gui.handleServiceViewLogsExternal,
+			Description: "View logs with external pager",
 		},
 		{
 			ViewName:    "services",
