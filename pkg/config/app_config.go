@@ -384,7 +384,7 @@ func GetDefaultConfig() UserConfig {
 			Timestamps: false,
 			Since:      "60m",
 			Tail:       "",
-			Pager:      "",
+			Pager:      "less -R",
 		},
 		CommandTemplates: CommandTemplatesConfig{
 			DockerCompose:            "docker compose",
