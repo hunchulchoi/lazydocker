@@ -1,7 +1,6 @@
 package gui
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/fatih/color"
@@ -199,7 +198,7 @@ func (gui *Gui) getInformationContent() string {
 
 	mouseStatus := "Mouse: ON"
 	if !gui.g.Mouse {
-		mouseStatus = fmt.Sprintf("Mouse: OFF (%ds left)", mouseTicksLeft)
+		mouseStatus = "Mouse: OFF (Drag to copy)"
 	}
 	informationStr = mouseStatus + " | " + informationStr
 

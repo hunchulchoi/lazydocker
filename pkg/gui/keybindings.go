@@ -74,13 +74,7 @@ func (gui *Gui) GetInitialKeybindings() []*Binding {
 			Modifier: gocui.ModNone,
 			Handler:  gui.quit,
 		},
-		{
-			ViewName:    "",
-			Key:         'M', // Shift+M
-			Modifier:    gocui.ModNone,
-			Handler:     wrappedHandler(gui.handleToggleMouse),
-			Description: "Toggle mouse mode (ON/OFF)",
-		},
+
 		{
 			ViewName: "",
 			Key:      gocui.KeyPgup,
