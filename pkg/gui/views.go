@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/fatih/color"
@@ -195,6 +196,13 @@ func (gui *Gui) setInitialViewContent() error {
 
 func (gui *Gui) getInformationContent() string {
 	informationStr := gui.Config.Version
+
+	mouseStatus := "Mouse: ON"
+	if !gui.g.Mouse {
+		mouseStatus = fmt.Sprintf("Mouse: OFF (%ds left)", mouseTicksLeft)
+	}
+	informationStr = mouseStatus + " | " + informationStr
+
 	if !gui.g.Mouse {
 		return informationStr
 	}

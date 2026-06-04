@@ -2,6 +2,8 @@ package gui
 
 import (
 	"math"
+	"sync"
+	"time"
 
 	"github.com/jesseduffield/gocui"
 )
@@ -110,4 +112,85 @@ func (gui *Gui) handleMainClick() error {
 	}
 
 	return gui.switchFocus(gui.Views.Main)
+}
+
+var (
+	mouseTimerMutex sync.Mutex
+	mouseTimer      *time.Timer
+	mouseTicker     *time.Ticker
+	mouseTicksLeft  int
+)
+
+func (gui *Gui) handleToggleMouse() error {
+	mouseTimerMutex.Lock()
+	defer mouseTimerMutex.Unlock()
+
+	if gui.g.Mouse {
+		// Disable Mouse
+		gui.g.Mouse = false
+		gocui.Screen.DisableMouse()
+
+		if mouseTimer != nil {
+			mouseTimer.Stop()
+		}
+		if mouseTicker != nil {
+			mouseTicker.Stop()
+		}
+
+		mouseTicksLeft = 15
+		mouseTimer = time.AfterFunc(15*time.Second, func() {
+			gui.g.Update(func(g *gocui.Gui) error {
+				mouseTimerMutex.Lock()
+				defer mouseTimerMutex.Unlock()
+
+				if !gui.g.Mouse {
+					gui.g.Mouse = true
+					gocui.Screen.EnableMouse()
+					if mouseTicker != nil {
+						mouseTicker.Stop()
+					}
+					_ = gui.renderString(gui.g, "information", gui.getInformationContent())
+				}
+				return nil
+			})
+		})
+
+		mouseTicker = time.NewTicker(1 * time.Second)
+		go func() {
+			for range mouseTicker.C {
+				gui.g.Update(func(g *gocui.Gui) error {
+					mouseTimerMutex.Lock()
+					defer mouseTimerMutex.Unlock()
+
+					if gui.g.Mouse {
+						return nil
+					}
+					mouseTicksLeft--
+					if mouseTicksLeft <= 0 {
+						if mouseTicker != nil {
+							mouseTicker.Stop()
+						}
+						return nil
+					}
+					_ = gui.renderString(gui.g, "information", gui.getInformationContent())
+					return nil
+				})
+			}
+		}()
+
+	} else {
+		// Enable Mouse manually
+		gui.g.Mouse = true
+		gocui.Screen.EnableMouse()
+
+		if mouseTimer != nil {
+			mouseTimer.Stop()
+		}
+		if mouseTicker != nil {
+			mouseTicker.Stop()
+		}
+	}
+
+	_ = gui.renderString(gui.g, "information", gui.getInformationContent())
+	return nil
 }
