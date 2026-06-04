@@ -221,6 +221,16 @@ func (gui *Gui) handleContainerViewLogsExternal(g *gocui.Gui, v *gocui.View) err
 	return gui.handleViewLogsExternal(ctr)
 }
 
+func (gui *Gui) handleMainViewLogsExternal(g *gocui.Gui, v *gocui.View) error {
+	currentSideViewName := gui.currentSideViewName()
+	if currentSideViewName == "containers" {
+		return gui.handleContainerViewLogsExternal(g, v)
+	} else if currentSideViewName == "services" {
+		return gui.handleServiceViewLogsExternal(g, v)
+	}
+	return nil
+}
+
 func (gui *Gui) handleViewLogsExternal(container *commands.Container) error {
 	pager := gui.Config.UserConfig.Logs.Pager
 	if pager == "" {

@@ -453,6 +453,13 @@ func (gui *Gui) GetInitialKeybindings() []*Binding {
 			Description: gui.Tr.Return,
 		},
 		{
+			ViewName:    "main",
+			Key:         'l',
+			Modifier:    gocui.ModNone,
+			Handler:     gui.handleMainViewLogsExternal,
+			Description: "View logs with external pager",
+		},
+		{
 			ViewName: "main",
 			Key:      gocui.KeyArrowLeft,
 			Modifier: gocui.ModNone,
