@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types/container"
@@ -226,15 +227,35 @@ func (gui *Gui) handleViewLogsExternal(container *commands.Container) error {
 		return gui.createErrorPanel("No external pager configured. Please set 'logs.pager' in config.yml")
 	}
 
+	tmpFile, err := os.CreateTemp("", "lazydocker-*.log")
+	if err != nil {
+		return gui.createErrorPanel(err.Error())
+	}
+	tmpPath := tmpFile.Name()
+	defer func() {
+		tmpFile.Close()
+		_ = os.Remove(tmpPath)
+	}()
+
 	stop := make(chan os.Signal, 1)
 	defer signal.Stop(stop)
 
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	go func() {
 		signal.Notify(stop, os.Interrupt)
 		<-stop
 		cancel()
 	}()
+
+	// Start writing container logs to the temporary file in background
+	go func() {
+		_ = gui.writeContainerLogs(container, ctx, tmpFile)
+	}()
+
+	// Wait briefly for some logs to be written so the pager has content on start
+	time.Sleep(200 * time.Millisecond)
 
 	if err := gui.g.Suspend(); err != nil {
 		gui.Log.Error(err)
@@ -247,26 +268,18 @@ func (gui *Gui) handleViewLogsExternal(container *commands.Container) error {
 		}
 	}()
 
-	cmd := exec.CommandContext(ctx, "sh", "-c", pager)
+	var cmdStr string
+	if strings.Contains(pager, "{{filename}}") {
+		cmdStr = strings.ReplaceAll(pager, "{{filename}}", tmpPath)
+	} else {
+		cmdStr = pager + " " + tmpPath
+	}
+
+	cmd := exec.CommandContext(ctx, "sh", "-c", cmdStr)
+	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	reader, writer := io.Pipe()
-	cmd.Stdin = reader
-
-	if err := cmd.Start(); err != nil {
-		reader.Close()
-		writer.Close()
-		fmt.Fprintf(os.Stdout, "\nError starting pager command: %v\n", err)
-		gui.promptToReturn()
-		return err
-	}
-
-	go func() {
-		defer writer.Close()
-		_ = gui.writeContainerLogs(container, ctx, writer)
-	}()
-
-	_ = cmd.Wait()
+	_ = cmd.Run()
 	return nil
 }
