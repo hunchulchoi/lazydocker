@@ -1,16 +1,19 @@
 package gui
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"os/signal"
 	"time"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/fatih/color"
+	"github.com/jesseduffield/gocui"
 	"github.com/jesseduffield/lazydocker/pkg/commands"
 	"github.com/jesseduffield/lazydocker/pkg/tasks"
 	"github.com/jesseduffield/lazydocker/pkg/utils"
@@ -136,17 +139,134 @@ func (gui *Gui) writeContainerLogs(ctr *commands.Container, ctx context.Context,
 		}
 	}
 
+	stdoutWriter := NewLogWriter(writer, false)
+	stderrWriter := NewLogWriter(writer, true)
+	defer stdoutWriter.Close()
+	defer stderrWriter.Close()
+
 	if ctr.Details.Config.Tty {
-		_, err = io.Copy(writer, readCloser)
+		_, err = io.Copy(stdoutWriter, readCloser)
 		if err != nil {
 			return err
 		}
 	} else {
-		_, err = stdcopy.StdCopy(writer, writer, readCloser)
+		_, err = stdcopy.StdCopy(stdoutWriter, stderrWriter, readCloser)
 		if err != nil {
 			return err
 		}
 	}
 
+	return nil
+}
+
+type LogWriter struct {
+	writer     io.Writer
+	lineBuffer []byte
+	isStderr   bool
+}
+
+func NewLogWriter(writer io.Writer, isStderr bool) *LogWriter {
+	return &LogWriter{
+		writer:     writer,
+		lineBuffer: make([]byte, 0),
+		isStderr:   isStderr,
+	}
+}
+
+func (lw *LogWriter) Write(p []byte) (n int, err error) {
+	n = len(p)
+	lw.lineBuffer = append(lw.lineBuffer, p...)
+
+	for {
+		idx := bytes.IndexByte(lw.lineBuffer, '\n')
+		if idx == -1 {
+			break
+		}
+
+		line := string(lw.lineBuffer[:idx])
+		lw.lineBuffer = lw.lineBuffer[idx+1:]
+
+		colorised := utils.ColoriseLog(line)
+		if lw.isStderr {
+			colorised = "\x1b[31;1m" + colorised + "\x1b[0m"
+		}
+
+		_, err = fmt.Fprintln(lw.writer, colorised)
+		if err != nil {
+			return n, err
+		}
+	}
+	return n, nil
+}
+
+func (lw *LogWriter) Close() error {
+	if len(lw.lineBuffer) > 0 {
+		line := string(lw.lineBuffer)
+		colorised := utils.ColoriseLog(line)
+		if lw.isStderr {
+			colorised = "\x1b[31;1m" + colorised + "\x1b[0m"
+		}
+		_, err := fmt.Fprint(lw.writer, colorised)
+		return err
+	}
+	return nil
+}
+
+func (gui *Gui) handleContainerViewLogsExternal(g *gocui.Gui, v *gocui.View) error {
+	ctr, err := gui.Panels.Containers.GetSelectedItem()
+	if err != nil {
+		return nil
+	}
+	return gui.handleViewLogsExternal(ctr)
+}
+
+func (gui *Gui) handleViewLogsExternal(container *commands.Container) error {
+	pager := gui.Config.UserConfig.Logs.Pager
+	if pager == "" {
+		return gui.createErrorPanel("No external pager configured. Please set 'logs.pager' in config.yml")
+	}
+
+	stop := make(chan os.Signal, 1)
+	defer signal.Stop(stop)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		signal.Notify(stop, os.Interrupt)
+		<-stop
+		cancel()
+	}()
+
+	if err := gui.g.Suspend(); err != nil {
+		gui.Log.Error(err)
+		return err
+	}
+
+	defer func() {
+		if err := gui.g.Resume(); err != nil {
+			gui.Log.Error(err)
+		}
+	}()
+
+	cmd := exec.CommandContext(ctx, "sh", "-c", pager)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	reader, writer := io.Pipe()
+	cmd.Stdin = reader
+
+	if err := cmd.Start(); err != nil {
+		reader.Close()
+		writer.Close()
+		fmt.Fprintf(os.Stdout, "\nError starting pager command: %v\n", err)
+		gui.promptToReturn()
+		return err
+	}
+
+	go func() {
+		defer writer.Close()
+		_ = gui.writeContainerLogs(container, ctx, writer)
+	}()
+
+	_ = cmd.Wait()
 	return nil
 }
