@@ -362,6 +362,13 @@ func (gui *Gui) currentListPanel() (panels.ISideListPanel, bool) {
 	return nil, false
 }
 
+// showComposePanels reports whether the Projects and Services panels are visible.
+// Upstream defaults to hiding them outside a compose directory; enable
+// gui.showComposePanelsGlobally to discover projects from container labels.
+func (gui *Gui) showComposePanels() bool {
+	return gui.DockerCommand.IsProjectScoped() || gui.Config.UserConfig.Gui.ShowComposePanelsGlobally
+}
+
 func (gui *Gui) allSidePanels() []panels.ISideListPanel {
 	return []panels.ISideListPanel{
 		gui.Panels.Projects,

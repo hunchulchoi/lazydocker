@@ -59,7 +59,7 @@ func (gui *Gui) getProjectPanel() *panels.SideListPanel[*commands.Project] {
 			return gui.renderContainersAndServices()
 		},
 		Hide: func() bool {
-			return !gui.DockerCommand.IsProjectScoped()
+			return !gui.showComposePanels()
 		},
 	}
 }

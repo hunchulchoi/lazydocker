@@ -105,6 +105,11 @@ type GuiConfig struct {
 	// of clutter
 	ShowAllContainers bool `yaml:"showAllContainers,omitempty"`
 
+	// ShowComposePanelsGlobally shows the Projects and Services panels even when
+	// lazydocker was not launched from a compose directory and no -p flag was
+	// given. Projects and services are discovered from container labels.
+	ShowComposePanelsGlobally bool `yaml:"showComposePanelsGlobally,omitempty"`
+
 	// ReturnImmediately determines whether you get the 'press enter to return to
 	// lazydocker' message after a subprocess has completed. You would set this to
 	// true if you often want to see the output of subprocesses before returning
@@ -369,6 +374,7 @@ func GetDefaultConfig() UserConfig {
 				OptionsTextColor:    []string{"blue"},
 			},
 			ShowAllContainers:          false,
+			ShowComposePanelsGlobally:  false,
 			ReturnImmediately:          false,
 			WrapMainPanel:              true,
 			LegacySortContainers:       false,

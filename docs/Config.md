@@ -54,6 +54,9 @@ gui:
   # When true, increases vertical space used by focused side panel,
   # creating an accordion effect
   expandFocusedSidePanel: false
+  # Show Projects and Services panels outside a compose directory by discovering
+  # projects from container labels. Default: false
+  showComposePanelsGlobally: false
   # Determines which screen mode will be used on startup
   screenMode: "normal" # one of 'normal' | 'half' | 'fullscreen'
   # Determines the style of the container status and container health display in the
