@@ -46,6 +46,16 @@ func (gui *Gui) getContainersPanel() *panels.SideListPanel[*commands.Container] 
 						Render: gui.renderContainerStats,
 					},
 					{
+						Key:    "ports",
+						Title:  gui.Tr.PortsTitle,
+						Render: gui.renderContainerPorts,
+					},
+					{
+						Key:    "volumes",
+						Title:  gui.Tr.VolumesTitle,
+						Render: gui.renderContainerVolumes,
+					},
+					{
 						Key:    "env",
 						Title:  gui.Tr.EnvTitle,
 						Render: gui.renderContainerEnv,

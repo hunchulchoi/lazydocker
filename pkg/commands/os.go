@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -100,6 +101,48 @@ func (c *OSCommand) NewCmd(cmdName string, commandArgs ...string) *exec.Cmd {
 	cmd := c.command(cmdName, commandArgs...)
 	cmd.Env = os.Environ()
 	return cmd
+}
+
+// DirSizeBytes returns the size of a directory in bytes.
+func (c *OSCommand) DirSizeBytes(path string) (int64, error) {
+	if path == "" {
+		return 0, errors.New("empty path")
+	}
+
+	switch c.Platform.os {
+	case "darwin":
+		output, err := c.RunExecutableWithOutput(c.NewCmd("du", "-sk", path))
+		if err != nil {
+			return 0, err
+		}
+		kilobytes, err := parseDuSizeField(output)
+		if err != nil {
+			return 0, err
+		}
+		return kilobytes * 1024, nil
+	case "linux":
+		output, err := c.RunExecutableWithOutput(c.NewCmd("du", "-sb", path))
+		if err != nil {
+			return 0, err
+		}
+		return parseDuSizeField(output)
+	default:
+		return 0, errors.New("unsupported platform")
+	}
+}
+
+func parseDuSizeField(output string) (int64, error) {
+	fields := strings.Fields(strings.TrimSpace(output))
+	if len(fields) == 0 {
+		return 0, errors.New("unexpected du output")
+	}
+
+	size, err := strconv.ParseInt(fields[0], 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return size, nil
 }
 
 func (c *OSCommand) NewCommandStringWithShell(commandStr string) string {

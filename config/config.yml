@@ -1,3 +1,6 @@
+# Fork plugin config — lazydocker binary updates separately:
+#   ./plugin/update.sh check
+#   ./plugin/update.sh update
 gui:
   showComposePanelsGlobally: true
 logs:

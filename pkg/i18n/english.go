@@ -118,6 +118,22 @@ type TranslationSet struct {
 	CreditsTitle                string
 	ContainerConfigTitle        string
 	ContainerEnvTitle           string
+	PortsTitle                  string
+	PortsInternalHeader         string
+	PortsExternalHeader         string
+	PortsHostHeader             string
+	PortsNetworkHeader          string
+	PortsContainerIPHeader      string
+	PortsGatewayHeader          string
+	PortsNetworksSection        string
+	VolumesTypeHeader           string
+	VolumesNameHeader           string
+	VolumesSourceHeader         string
+	VolumesDestinationHeader    string
+	VolumesSizeHeader           string
+	VolumesDriverHeader         string
+	VolumesModeHeader           string
+	VolumesAccessHeader         string
 	NothingToDisplay            string
 	NoContainerForService       string
 	CannotDisplayEnvVariables   string
@@ -239,6 +255,22 @@ func englishSet() TranslationSet {
 		CreditsTitle:                "About",
 		ContainerConfigTitle:        "Container Config",
 		ContainerEnvTitle:           "Container Env",
+		PortsTitle:                  "Ports",
+		PortsInternalHeader:         "Internal",
+		PortsExternalHeader:         "External",
+		PortsHostHeader:             "Host",
+		PortsNetworkHeader:          "Network(s)",
+		PortsContainerIPHeader:      "Container IP",
+		PortsGatewayHeader:          "Gateway",
+		PortsNetworksSection:        "Networks",
+		VolumesTypeHeader:           "Type",
+		VolumesNameHeader:           "Name",
+		VolumesSourceHeader:         "Source",
+		VolumesDestinationHeader:    "Destination",
+		VolumesSizeHeader:           "Size",
+		VolumesDriverHeader:         "Driver",
+		VolumesModeHeader:           "Mode",
+		VolumesAccessHeader:         "Access",
 		NothingToDisplay:            "Nothing to display",
 		NoContainerForService:       "No logs to show; service is not associated with a container",
 		CannotDisplayEnvVariables:   "Something went wrong while displaying environment variables",

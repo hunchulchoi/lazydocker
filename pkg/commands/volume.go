@@ -3,9 +3,11 @@ package commands
 import (
 	"context"
 
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/client"
+	"github.com/go-errors/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -26,11 +28,18 @@ func (c *DockerCommand) RefreshVolumes() ([]*Volume, error) {
 		return nil, err
 	}
 
+	usageByName := c.volumeUsageByName()
 	volumes := result.Volumes
 
 	ownVolumes := make([]*Volume, len(volumes))
 
 	for i, vol := range volumes {
+		if usageByName != nil {
+			if usageData, ok := usageByName[vol.Name]; ok {
+				vol.UsageData = usageData
+			}
+		}
+
 		ownVolumes[i] = &Volume{
 			Name:          vol.Name,
 			Volume:        vol,
@@ -42,6 +51,39 @@ func (c *DockerCommand) RefreshVolumes() ([]*Volume, error) {
 	}
 
 	return ownVolumes, nil
+}
+
+func (c *DockerCommand) volumeUsageByName() map[string]*volume.UsageData {
+	usage, err := c.Client.DiskUsage(context.Background(), types.DiskUsageOptions{
+		Types: []types.DiskUsageObject{types.VolumeObject},
+	})
+	if err != nil {
+		return nil
+	}
+
+	usageByName := make(map[string]*volume.UsageData, len(usage.Volumes))
+	for _, vol := range usage.Volumes {
+		if vol != nil && vol.UsageData != nil {
+			usageByName[vol.Name] = vol.UsageData
+		}
+	}
+
+	return usageByName
+}
+
+// VolumeSizesByName returns volume disk usage keyed by volume name.
+func (c *DockerCommand) VolumeSizesByName() (map[string]int64, error) {
+	usageByName := c.volumeUsageByName()
+	if usageByName == nil {
+		return nil, errors.New("failed to get volume disk usage")
+	}
+
+	sizes := make(map[string]int64, len(usageByName))
+	for name, usageData := range usageByName {
+		sizes[name] = usageData.Size
+	}
+
+	return sizes, nil
 }
 
 // PruneVolumes prunes volumes

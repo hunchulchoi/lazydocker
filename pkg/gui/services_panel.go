@@ -33,6 +33,16 @@ func (gui *Gui) getServicesPanel() *panels.SideListPanel[*commands.Service] {
 						Render: gui.renderServiceStats,
 					},
 					{
+						Key:    "ports",
+						Title:  gui.Tr.PortsTitle,
+						Render: gui.renderServiceContainerPorts,
+					},
+					{
+						Key:    "volumes",
+						Title:  gui.Tr.VolumesTitle,
+						Render: gui.renderServiceContainerVolumes,
+					},
+					{
 						Key:    "container-env",
 						Title:  gui.Tr.ContainerEnvTitle,
 						Render: gui.renderServiceContainerEnv,
