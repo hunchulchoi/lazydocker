@@ -1,2 +1,4 @@
+gui:
+  showComposePanelsGlobally: true
 logs:
   pager: "lnav"
