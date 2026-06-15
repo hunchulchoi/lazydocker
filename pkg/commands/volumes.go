@@ -5,8 +5,8 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 	dockermount "github.com/docker/docker/api/types/mount"
-	"github.com/jesseduffield/lazydocker/pkg/i18n"
-	"github.com/jesseduffield/lazydocker/pkg/utils"
+	"github.com/hunchulchoi/lazydocker/pkg/i18n"
+	"github.com/hunchulchoi/lazydocker/pkg/utils"
 )
 
 // MountSizes provides optional disk usage data for container mounts.

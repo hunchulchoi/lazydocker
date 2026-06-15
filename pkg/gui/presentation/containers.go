@@ -8,9 +8,9 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/fatih/color"
-	"github.com/jesseduffield/lazydocker/pkg/commands"
-	"github.com/jesseduffield/lazydocker/pkg/config"
-	"github.com/jesseduffield/lazydocker/pkg/utils"
+	"github.com/hunchulchoi/lazydocker/pkg/commands"
+	"github.com/hunchulchoi/lazydocker/pkg/config"
+	"github.com/hunchulchoi/lazydocker/pkg/utils"
 	"github.com/samber/lo"
 )
 

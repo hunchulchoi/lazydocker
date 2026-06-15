@@ -2,7 +2,7 @@ package presentation
 
 import (
 	"github.com/fatih/color"
-	"github.com/jesseduffield/lazydocker/pkg/utils"
+	"github.com/hunchulchoi/lazydocker/pkg/utils"
 	"github.com/samber/lo"
 )
 

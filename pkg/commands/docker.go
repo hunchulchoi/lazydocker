@@ -21,10 +21,10 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/imdario/mergo"
-	"github.com/jesseduffield/lazydocker/pkg/commands/ssh"
-	"github.com/jesseduffield/lazydocker/pkg/config"
-	"github.com/jesseduffield/lazydocker/pkg/i18n"
-	"github.com/jesseduffield/lazydocker/pkg/utils"
+	"github.com/hunchulchoi/lazydocker/pkg/commands/ssh"
+	"github.com/hunchulchoi/lazydocker/pkg/config"
+	"github.com/hunchulchoi/lazydocker/pkg/i18n"
+	"github.com/hunchulchoi/lazydocker/pkg/utils"
 	"github.com/sasha-s/go-deadlock"
 	"github.com/sirupsen/logrus"
 )
@@ -90,7 +90,7 @@ func (c *DockerCommand) NewCommandObject(obj CommandObject) CommandObject {
 // negotiation even when WithAPIVersionNegotiation() is specified.
 // Instead, we explicitly configure only what we need, and rely on proper
 // API version negotiation to support older Docker daemons.
-// See https://github.com/jesseduffield/lazydocker/issues/715
+// See https://github.com/hunchulchoi/lazydocker/issues/715
 func newDockerClient(dockerHost string) (*client.Client, error) {
 	return client.NewClientWithOpts(
 		client.WithTLSClientConfigFromEnv(),

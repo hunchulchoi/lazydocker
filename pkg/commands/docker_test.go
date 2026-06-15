@@ -5,14 +5,14 @@ import (
 	"testing"
 
 	"github.com/docker/docker/client"
-	"github.com/jesseduffield/lazydocker/pkg/config"
+	"github.com/hunchulchoi/lazydocker/pkg/config"
 	"github.com/stretchr/testify/assert"
 )
 
 // TestNewDockerClientVersionNegotiation verifies that newDockerClient allows
 // API version negotiation even when DOCKER_API_VERSION is set.
 //
-// This is a regression test for https://github.com/jesseduffield/lazydocker/issues/715
+// This is a regression test for https://github.com/hunchulchoi/lazydocker/issues/715
 // where users got "client version 1.25 is too old" errors because FromEnv()
 // includes WithVersionFromEnv() which sets manualOverride=true, preventing
 // API version negotiation.

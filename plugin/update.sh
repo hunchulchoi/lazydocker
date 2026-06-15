@@ -8,12 +8,12 @@
 #   DIR=~/.local/bin plugin/update.sh update
 #
 # Env:
-#   LAZYDOCKER_REPO  GitHub repo (default: jesseduffield/lazydocker)
+#   LAZYDOCKER_REPO  GitHub repo (default: hunchulchoi/lazydocker)
 #   DIR              Install dir (default: ~/.local/bin)
 
 set -euo pipefail
 
-LAZYDOCKER_REPO="${LAZYDOCKER_REPO:-jesseduffield/lazydocker}"
+LAZYDOCKER_REPO="${LAZYDOCKER_REPO:-hunchulchoi/lazydocker}"
 DIR="${DIR:-$HOME/.local/bin}"
 GITHUB_API="https://api.github.com/repos/${LAZYDOCKER_REPO}/releases/latest"
 
@@ -27,7 +27,7 @@ Usage: $(basename "$0") check|update
 Linux and macOS only. Windows not supported.
 
 Environment:
-  LAZYDOCKER_REPO  default: jesseduffield/lazydocker
+  LAZYDOCKER_REPO  default: hunchulchoi/lazydocker
   DIR              install directory, default: ~/.local/bin
 EOF
 }

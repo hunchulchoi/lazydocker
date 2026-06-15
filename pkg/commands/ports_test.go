@@ -6,7 +6,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/go-connections/nat"
-	"github.com/jesseduffield/lazydocker/pkg/i18n"
+	"github.com/hunchulchoi/lazydocker/pkg/i18n"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )

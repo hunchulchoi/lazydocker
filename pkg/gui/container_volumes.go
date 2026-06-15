@@ -1,8 +1,8 @@
 package gui
 
 import (
-	"github.com/jesseduffield/lazydocker/pkg/commands"
-	"github.com/jesseduffield/lazydocker/pkg/tasks"
+	"github.com/hunchulchoi/lazydocker/pkg/commands"
+	"github.com/hunchulchoi/lazydocker/pkg/tasks"
 )
 
 func (gui *Gui) renderContainerVolumes(container *commands.Container) tasks.TaskFunc {

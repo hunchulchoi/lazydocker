@@ -1,6 +1,6 @@
 package gui
 
-import "github.com/jesseduffield/lazydocker/pkg/gui/panels"
+import "github.com/hunchulchoi/lazydocker/pkg/gui/panels"
 
 func (gui *Gui) intoInterface() panels.IGui {
 	return gui

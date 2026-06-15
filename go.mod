@@ -1,4 +1,4 @@
-module github.com/jesseduffield/lazydocker
+module github.com/hunchulchoi/lazydocker
 
 go 1.22
 

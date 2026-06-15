@@ -1,7 +1,7 @@
 services:
   lazydocker:
     build:
-      context: https://github.com/jesseduffield/lazydocker.git
+      context: https://github.com/hunchulchoi/lazydocker.git
       args:
         BASE_IMAGE_BUILDER: golang
         GOARCH: amd64

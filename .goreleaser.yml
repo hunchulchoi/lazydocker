@@ -67,7 +67,7 @@ brews:
 
     # Your app's homepage.
     # Default is empty.
-    homepage: "https://github.com/jesseduffield/lazydocker/"
+    homepage: "https://github.com/hunchulchoi/lazydocker/"
 
     # Your app's description.
     # Default is empty.

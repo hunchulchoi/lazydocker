@@ -6,8 +6,8 @@ import (
 
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/go-connections/nat"
-	"github.com/jesseduffield/lazydocker/pkg/i18n"
-	"github.com/jesseduffield/lazydocker/pkg/utils"
+	"github.com/hunchulchoi/lazydocker/pkg/i18n"
+	"github.com/hunchulchoi/lazydocker/pkg/utils"
 )
 
 func (c *Container) RenderPorts(tr *i18n.TranslationSet) (string, error) {
