@@ -14,6 +14,7 @@ import (
 // Volume : A docker Volume
 type Volume struct {
 	Name          string
+	Dangling      bool
 	Volume        *volume.Volume
 	Client        *client.Client
 	OSCommand     *OSCommand
@@ -29,6 +30,7 @@ func (c *DockerCommand) RefreshVolumes() ([]*Volume, error) {
 	}
 
 	usageByName := c.volumeUsageByName()
+	danglingNames := c.danglingVolumeNames()
 	volumes := result.Volumes
 
 	ownVolumes := make([]*Volume, len(volumes))
@@ -42,6 +44,7 @@ func (c *DockerCommand) RefreshVolumes() ([]*Volume, error) {
 
 		ownVolumes[i] = &Volume{
 			Name:          vol.Name,
+			Dangling:      mapContains(danglingNames, vol.Name),
 			Volume:        vol,
 			Client:        c.Client,
 			OSCommand:     c.OSCommand,

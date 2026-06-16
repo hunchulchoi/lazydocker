@@ -12,6 +12,7 @@ import (
 // Network : A docker Network
 type Network struct {
 	Name          string
+	Dangling      bool
 	Network       network.Inspect
 	Client        *client.Client
 	OSCommand     *OSCommand
@@ -26,11 +27,13 @@ func (c *DockerCommand) RefreshNetworks() ([]*Network, error) {
 		return nil, err
 	}
 
+	danglingNames := c.danglingNetworkNames()
 	ownNetworks := make([]*Network, len(networks))
 
 	for i, nw := range networks {
 		ownNetworks[i] = &Network{
 			Name:          nw.Name,
+			Dangling:      mapContains(danglingNames, nw.Name),
 			Network:       nw,
 			Client:        c.Client,
 			OSCommand:     c.OSCommand,

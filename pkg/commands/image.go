@@ -18,6 +18,7 @@ type Image struct {
 	Name          string
 	Tag           string
 	ID            string
+	Dangling      bool
 	Image         image.Summary
 	Client        *client.Client
 	OSCommand     *OSCommand
@@ -97,6 +98,7 @@ func (c *DockerCommand) RefreshImages() ([]*Image, error) {
 		return nil, err
 	}
 
+	danglingIDs := c.danglingImageIDs()
 	ownImages := make([]*Image, len(images))
 
 	for i, img := range images {
@@ -125,6 +127,7 @@ func (c *DockerCommand) RefreshImages() ([]*Image, error) {
 			ID:            img.ID,
 			Name:          name,
 			Tag:           tag,
+			Dangling:      mapContains(danglingIDs, img.ID),
 			Image:         img,
 			Client:        c.Client,
 			OSCommand:     c.OSCommand,
