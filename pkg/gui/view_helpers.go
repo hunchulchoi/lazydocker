@@ -211,10 +211,13 @@ func (gui *Gui) resizeCurrentPopupPanel(g *gocui.Gui) error {
 }
 
 func (gui *Gui) resizePopupPanel(v *gocui.View) error {
-	// If the confirmation panel is already displayed, just resize the width,
-	// otherwise continue
 	content := v.Buffer()
-	x0, y0, x1, y1 := gui.getConfirmationPanelDimensions(v.Wrap, content)
+	var x0, y0, x1, y1 int
+	if v.Name() == "portsOverview" || gui.State.confirmationIsInfo {
+		x0, y0, x1, y1 = gui.getInfoPanelDimensions()
+	} else {
+		x0, y0, x1, y1 = gui.getConfirmationPanelDimensions(v.Wrap, content)
+	}
 	vx0, vy0, vx1, vy1 := v.Dimensions()
 	if vx0 == x0 && vy0 == y0 && vx1 == x1 && vy1 == y1 {
 		return nil
@@ -228,6 +231,8 @@ func (gui *Gui) renderPanelOptions() error {
 	switch currentView.Name() {
 	case "menu":
 		return gui.renderMenuOptions()
+	case "portsOverview":
+		return gui.renderPortsOverviewOptions()
 	case "confirmation":
 		return gui.renderConfirmationOptions()
 	}
@@ -381,7 +386,7 @@ func (gui *Gui) allSidePanels() []panels.ISideListPanel {
 }
 
 func (gui *Gui) allListPanels() []panels.ISideListPanel {
-	return append(gui.allSidePanels(), gui.Panels.Menu)
+	return append(gui.allSidePanels(), gui.Panels.Menu, gui.Panels.PortsOverview)
 }
 
 func (gui *Gui) IsCurrentView(view *gocui.View) bool {

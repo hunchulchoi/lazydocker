@@ -7,6 +7,7 @@
 package gui
 
 import (
+	"math"
 	"strings"
 
 	"github.com/fatih/color"
@@ -35,6 +36,7 @@ func (gui *Gui) closeConfirmationPrompt() error {
 	}
 	gui.g.DeleteViewKeybindings("confirmation")
 	gui.Views.Confirmation.Visible = false
+	gui.State.confirmationIsInfo = false
 	return nil
 }
 
@@ -53,6 +55,10 @@ func (gui *Gui) getMessageHeight(wrap bool, message string, width int) int {
 }
 
 func (gui *Gui) getConfirmationPanelDimensions(wrap bool, prompt string) (int, int, int, int) {
+	if gui.State.confirmationIsInfo {
+		return gui.getInfoPanelDimensions()
+	}
+
 	width, height := gui.g.Size()
 	panelWidth := width / 2
 	panelHeight := gui.getMessageHeight(wrap, prompt, panelWidth)
@@ -60,6 +66,16 @@ func (gui *Gui) getConfirmationPanelDimensions(wrap bool, prompt string) (int, i
 		height/2 - panelHeight/2 - panelHeight%2 - 1,
 		width/2 + panelWidth/2,
 		height/2 + panelHeight/2
+}
+
+func (gui *Gui) getInfoPanelDimensions() (int, int, int, int) {
+	width, height := gui.g.Size()
+	panelWidth := width * 4 / 5
+	panelHeight := height * 7 / 10
+	return (width - panelWidth) / 2,
+		(height - panelHeight) / 2,
+		(width + panelWidth) / 2,
+		(height + panelHeight) / 2
 }
 
 func (gui *Gui) createPromptPanel(title string, handleConfirm func(*gocui.Gui, *gocui.View) error) error {
@@ -89,6 +105,7 @@ func (gui *Gui) prepareConfirmationPanel(title, prompt string) error {
 
 func (gui *Gui) onNewPopupPanel() {
 	gui.Views.Menu.Visible = false
+	gui.Views.PortsOverview.Visible = false
 	gui.Views.Confirmation.Visible = false
 }
 
@@ -96,10 +113,10 @@ func (gui *Gui) onNewPopupPanel() {
 // The golangcilint unparam linter complains that handleClose is alwans nil but one day it won't be nil.
 // nolint:unparam
 func (gui *Gui) createConfirmationPanel(title, prompt string, handleConfirm, handleClose func(*gocui.Gui, *gocui.View) error) error {
-	return gui.createPopupPanel(title, prompt, handleConfirm, handleClose)
+	return gui.createPopupPanel(title, prompt, handleConfirm, handleClose, false)
 }
 
-func (gui *Gui) createPopupPanel(title, prompt string, handleConfirm, handleClose func(*gocui.Gui, *gocui.View) error) error {
+func (gui *Gui) createPopupPanel(title, prompt string, handleConfirm, handleClose func(*gocui.Gui, *gocui.View) error, isInfo bool) error {
 	gui.onNewPopupPanel()
 	gui.g.Update(func(g *gocui.Gui) error {
 		if gui.currentViewName() == "confirmation" {
@@ -107,6 +124,7 @@ func (gui *Gui) createPopupPanel(title, prompt string, handleConfirm, handleClos
 				gui.Log.Error(err.Error())
 			}
 		}
+		gui.State.confirmationIsInfo = isInfo
 		err := gui.prepareConfirmationPanel(title, prompt)
 		if err != nil {
 			return err
@@ -115,9 +133,16 @@ func (gui *Gui) createPopupPanel(title, prompt string, handleConfirm, handleClos
 		if err := gui.renderString(g, "confirmation", prompt); err != nil {
 			return err
 		}
+		if gui.State.confirmationIsInfo {
+			return gui.setInfoKeyBindings(g)
+		}
 		return gui.setKeyBindings(g, handleConfirm, handleClose)
 	})
 	return nil
+}
+
+func (gui *Gui) createInfoPanel(title, prompt string) error {
+	return gui.createPopupPanel(title, prompt, nil, nil, true)
 }
 
 func (gui *Gui) setKeyBindings(g *gocui.Gui, handleConfirm, handleClose func(*gocui.Gui, *gocui.View) error) error {
@@ -139,6 +164,59 @@ func (gui *Gui) setKeyBindings(g *gocui.Gui, handleConfirm, handleClose func(*go
 	return nil
 }
 
+func (gui *Gui) setInfoKeyBindings(g *gocui.Gui) error {
+	closeHandler := gui.wrappedConfirmationFunction(nil)
+	scrollUp := func(g *gocui.Gui, v *gocui.View) error {
+		return gui.scrollUpConfirmation()
+	}
+	scrollDown := func(g *gocui.Gui, v *gocui.View) error {
+		return gui.scrollDownConfirmation()
+	}
+
+	bindings := []struct {
+		key     interface{}
+		mod     gocui.Modifier
+		handler func(*gocui.Gui, *gocui.View) error
+	}{
+		{gocui.KeyEsc, gocui.ModNone, closeHandler},
+		{gocui.KeyEnter, gocui.ModNone, closeHandler},
+		{gocui.KeyPgup, gocui.ModNone, scrollUp},
+		{gocui.KeyPgdn, gocui.ModNone, scrollDown},
+		{gocui.KeyCtrlU, gocui.ModNone, scrollUp},
+		{gocui.KeyCtrlD, gocui.ModNone, scrollDown},
+		{'k', gocui.ModNone, scrollUp},
+		{'j', gocui.ModNone, scrollDown},
+	}
+
+	for _, binding := range bindings {
+		if err := g.SetKeybinding("confirmation", binding.key, binding.mod, binding.handler); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (gui *Gui) scrollUpConfirmation() error {
+	view := gui.Views.Confirmation
+	ox, oy := view.Origin()
+	newOy := int(math.Max(0, float64(oy-gui.Config.UserConfig.Gui.ScrollHeight)))
+	return view.SetOrigin(ox, newOy)
+}
+
+func (gui *Gui) scrollDownConfirmation() error {
+	view := gui.Views.Confirmation
+	ox, oy := view.Origin()
+	_, sizeY := view.Size()
+
+	totalLines := view.ViewLinesHeight()
+	if oy+sizeY >= totalLines {
+		return nil
+	}
+
+	return view.SetOrigin(ox, oy+gui.Config.UserConfig.Gui.ScrollHeight)
+}
+
 func (gui *Gui) createErrorPanel(message string) error {
 	colorFunction := color.New(color.FgRed).SprintFunc()
 	coloredMessage := colorFunction(strings.TrimSpace(message))
@@ -146,9 +224,21 @@ func (gui *Gui) createErrorPanel(message string) error {
 }
 
 func (gui *Gui) renderConfirmationOptions() error {
+	if gui.State.confirmationIsInfo {
+		return gui.renderInfoOptions()
+	}
+
 	optionsMap := map[string]string{
 		"n/esc":   gui.Tr.No,
 		"y/enter": gui.Tr.Yes,
+	}
+	return gui.renderOptionsMap(optionsMap)
+}
+
+func (gui *Gui) renderInfoOptions() error {
+	optionsMap := map[string]string{
+		"esc/enter": gui.Tr.Close,
+		"↑ ↓":       gui.Tr.Navigate,
 	}
 	return gui.renderOptionsMap(optionsMap)
 }

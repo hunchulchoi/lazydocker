@@ -47,8 +47,9 @@ type Views struct {
 	Filter *gocui.View
 
 	// popups
-	Confirmation *gocui.View
-	Menu         *gocui.View
+	Confirmation  *gocui.View
+	Menu          *gocui.View
+	PortsOverview *gocui.View
 
 	// will cover everything when it appears
 	Limit *gocui.View
@@ -84,6 +85,7 @@ func (gui *Gui) orderedViewNameMappings() []viewNameMapping {
 
 		// popups.
 		{viewPtr: &gui.Views.Menu, name: "menu", autoPosition: false},
+		{viewPtr: &gui.Views.PortsOverview, name: "portsOverview", autoPosition: false},
 		{viewPtr: &gui.Views.Confirmation, name: "confirmation", autoPosition: false},
 
 		// this guy will cover everything else when it appears
@@ -165,6 +167,8 @@ func (gui *Gui) createAllViews() error {
 	gui.Views.Confirmation.Wrap = true
 	gui.Views.Menu.Visible = false
 	gui.Views.Menu.SelBgColor = selectedLineBgColor
+	gui.Views.PortsOverview.Visible = false
+	gui.Views.PortsOverview.SelBgColor = selectedLineBgColor
 
 	gui.Views.Limit.Visible = false
 	gui.Views.Limit.Title = gui.Tr.NotEnoughSpace
@@ -216,7 +220,7 @@ func (gui *Gui) getInformationContent() string {
 }
 
 func (gui *Gui) popupViewNames() []string {
-	return []string{"confirmation", "menu"}
+	return []string{"confirmation", "menu", "portsOverview"}
 }
 
 // these views have their position and size determined by arrangement.go

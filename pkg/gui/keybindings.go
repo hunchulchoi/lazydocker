@@ -5,6 +5,7 @@ import (
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/jesseduffield/gocui"
+	"github.com/hunchulchoi/lazydocker/pkg/commands"
 )
 
 // Binding - a keybinding mapping a key and modifier to a handler. The keypress
@@ -180,6 +181,18 @@ func (gui *Gui) GetInitialKeybindings() []*Binding {
 			Key:      'y',
 			Modifier: gocui.ModNone,
 			Handler:  wrappedHandler(gui.handleMenuPress),
+		},
+		{
+			ViewName: "portsOverview",
+			Key:      gocui.KeyEsc,
+			Modifier: gocui.ModNone,
+			Handler:  wrappedHandler(gui.handlePortsOverviewClose),
+		},
+		{
+			ViewName: "portsOverview",
+			Key:      'q',
+			Modifier: gocui.ModNone,
+			Handler:  wrappedHandler(gui.handlePortsOverviewClose),
 		},
 		{
 			ViewName: "information",
@@ -522,6 +535,13 @@ func (gui *Gui) GetInitialKeybindings() []*Binding {
 		},
 		{
 			ViewName:    "",
+			Key:         'P',
+			Modifier:    gocui.ModNone,
+			Handler:     gui.handleShowAllPorts,
+			Description: gui.Tr.ShowAllPorts,
+		},
+		{
+			ViewName:    "",
 			Key:         '+',
 			Handler:     wrappedHandler(gui.nextScreenMode),
 			Description: gui.Tr.LcNextScreenMode,
@@ -596,6 +616,17 @@ func (gui *Gui) GetInitialKeybindings() []*Binding {
 				Description: gui.Tr.NextContext,
 			},
 		)
+	}
+
+	for i := 0; i < 7; i++ {
+		column := commands.PortOverviewSortColumn(i)
+		bindings = append(bindings, &Binding{
+			ViewName:    "portsOverview",
+			Key:         rune('1' + i),
+			Modifier:    gocui.ModNone,
+			Handler:     wrappedHandler(func() error { return gui.handlePortsOverviewSort(column) }),
+			Description: gui.Tr.PortsSortByColumn,
+		})
 	}
 
 	for _, panel := range gui.allListPanels() {

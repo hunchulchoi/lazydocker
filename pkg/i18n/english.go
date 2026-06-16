@@ -119,6 +119,14 @@ type TranslationSet struct {
 	ContainerConfigTitle        string
 	ContainerEnvTitle           string
 	PortsTitle                  string
+	AllPortsTitle               string
+	LoadingPorts                string
+	ShowAllPorts                string
+	PortsSortByColumn           string
+	PortsContainerHeader        string
+	PortsServiceHeader          string
+	PortsStateHeader            string
+	PortsInspectFailedSummary   string
 	PortsInternalHeader         string
 	PortsExternalHeader         string
 	PortsHostHeader             string
@@ -256,6 +264,14 @@ func englishSet() TranslationSet {
 		ContainerConfigTitle:        "Container Config",
 		ContainerEnvTitle:           "Container Env",
 		PortsTitle:                  "Ports",
+		AllPortsTitle:               "All Ports",
+		LoadingPorts:                "loading ports",
+		ShowAllPorts:                "show all ports",
+		PortsSortByColumn:           "sort by column (1-7)",
+		PortsContainerHeader:        "Container",
+		PortsServiceHeader:          "Service",
+		PortsStateHeader:            "State",
+		PortsInspectFailedSummary:   "%d container(s) could not be inspected",
 		PortsInternalHeader:         "Internal",
 		PortsExternalHeader:         "External",
 		PortsHostHeader:             "Host",

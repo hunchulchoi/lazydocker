@@ -54,7 +54,8 @@ type Panels struct {
 	Images     *panels.SideListPanel[*commands.Image]
 	Volumes    *panels.SideListPanel[*commands.Volume]
 	Networks   *panels.SideListPanel[*commands.Network]
-	Menu       *panels.SideListPanel[*types.MenuItem]
+	Menu           *panels.SideListPanel[*types.MenuItem]
+	PortsOverview  *PortsOverviewPanel
 }
 
 type Mutexes struct {
@@ -87,6 +88,12 @@ type guiState struct {
 	// Maintains the state of manual filtering i.e. typing in a substring
 	// to filter on in the current panel.
 	Filter filterState
+
+	// confirmationIsInfo is true when the confirmation view is used as a read-only info panel.
+	confirmationIsInfo bool
+
+	portsOverviewSortColumn commands.PortOverviewSortColumn
+	portsOverviewSortAsc    bool
 }
 
 type filterState struct {
@@ -287,7 +294,8 @@ func (gui *Gui) setPanels() {
 		Images:     gui.getImagesPanel(),
 		Volumes:    gui.getVolumesPanel(),
 		Networks:   gui.getNetworksPanel(),
-		Menu:       gui.getMenuPanel(),
+		Menu:          gui.getMenuPanel(),
+		PortsOverview: gui.getPortsOverviewPanel(),
 	}
 }
 

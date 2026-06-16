@@ -79,6 +79,9 @@ func (gui *Gui) switchFocusAux(newView *gocui.View) error {
 	if !lo.Contains(newViewStack, "menu") {
 		gui.Views.Menu.Visible = false
 	}
+	if !lo.Contains(newViewStack, "portsOverview") {
+		gui.Views.PortsOverview.Visible = false
+	}
 
 	return gui.newLineFocused(newView)
 }
